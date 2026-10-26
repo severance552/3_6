@@ -3,84 +3,10 @@ const btnKick2 = document.getElementById('btn-kick2');
 const $logs = document.getElementById('logs');
 let isGameOver = false;
 
+// --- ДОПОМІЖНІ ФУНКЦІЇ ---
 function random(max, min = 0) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-function renderHPLife() {
-    const { damageHP, defaultHP, elHP } = this;
-    elHP.innerText = `${damageHP} / ${defaultHP}`;
-}
-
-function renderProgressbarHP() {
-    const { damageHP, defaultHP, elProgressbar } = this;
-    const percent = (damageHP / defaultHP) * 100;
-
-    elProgressbar.style.width = `${percent}%`;
-    elProgressbar.classList.remove('low', 'critical');
-
-    if (percent < 20) {
-        elProgressbar.classList.add('critical');
-    } else if (percent < 60) {
-        elProgressbar.classList.add('low');
-    }
-}
-
-function renderHP() {
-    this.renderHPLife();
-    this.renderProgressbarHP();
-}
-
-function changeHP(count, defender, attacker) {
-    if (isGameOver) return; 
-
-    this.damageHP -= count;
-    
-    if (this.damageHP <= 0) {
-        this.damageHP = 0;
-        isGameOver = true;
-        
-        btnKick1.disabled = true;
-        btnKick2.disabled = true;
-
-        setTimeout(() => {
-            alert(`${this.name} програв бій!`);
-        }, 300);
-    }
-    
-    this.renderHP();
-
-    const logText = generateLog(attacker, defender, count);
-    
-    const $p = document.createElement('p');
-    $p.innerText = logText;
-
-    $logs.insertBefore($p, $logs.children[0]);
-}
-
-const character = {
-    name: 'Pikachu',
-    defaultHP: 100,
-    damageHP: 100,
-    elHP: document.getElementById('health-character'),
-    elProgressbar: document.getElementById('progressbar-character'),
-    renderHPLife,
-    renderProgressbarHP,
-    renderHP,
-    changeHP
-};
-
-const enemy = {
-    name: 'Charmander',
-    defaultHP: 100,
-    damageHP: 100,
-    elHP: document.getElementById('health-enemy'),
-    elProgressbar: document.getElementById('progressbar-enemy'),
-    renderHPLife,
-    renderProgressbarHP,
-    renderHP,
-    changeHP
-};
 
 function generateLog(firstPerson, secondPerson, count) {
     const { name: firstName } = firstPerson;
@@ -100,43 +26,121 @@ function generateLog(firstPerson, secondPerson, count) {
     ];
 
     const randomText = logs[random(logs.length - 1)];
-
     return `${randomText} -${count}, [${damageHP}/${defaultHP}]`;
 }
 
-function performAttack(dmgToEnemy, dmgToCharacter) {
-    enemy.changeHP(dmgToEnemy, enemy, character);
-    if (!isGameOver) {
-        character.changeHP(dmgToCharacter, character, enemy);
+// --- КЛАСИ ---
+class Selectors {
+    constructor(selector) {
+        this.elHP = document.getElementById(`health-${selector}`);
+        this.elProgressbar = document.getElementById(`progressbar-${selector}`);
     }
 }
 
+class Pokemon extends Selectors {
+    constructor({ name, defaultHP, selector }) {
+        super(selector);
+        this.name = name;
+        this.defaultHP = defaultHP;
+        this.damageHP = defaultHP;
+        
+        this.renderHP();
+    }
 
-/**
- * 
- * @param {number} limit
- * @param {HTMLElement} btn
- * @returns {Function}
- */
+    renderHPLife = () => {
+        this.elHP.innerText = `${this.damageHP} / ${this.defaultHP}`;
+    }
+
+    renderProgressbarHP = () => {
+        const percent = (this.damageHP / this.defaultHP) * 100;
+        this.elProgressbar.style.width = `${percent}%`;
+        this.elProgressbar.classList.remove('low', 'critical');
+
+        if (percent < 20) {
+            this.elProgressbar.classList.add('critical');
+        } else if (percent < 60) {
+            this.elProgressbar.classList.add('low');
+        }
+    }
+
+    renderHP = () => {
+        this.renderHPLife();
+        this.renderProgressbarHP();
+    }
+
+    changeHP = (count, cb) => {
+        this.damageHP -= count;
+        if (this.damageHP <= 0) {
+            this.damageHP = 0;
+        }
+        this.renderHP();
+        
+        // Викликаємо колбек-функцію, якщо вона передана (для логів бою)
+        if (cb) {
+            cb(count);
+        }
+    }
+}
+
+// --- СТВОРЕННЯ ГЕРОЇВ (РЕФАКТОРИНГ) ---
+const player1 = new Pokemon({
+    name: 'Pikachu',
+    defaultHP: 100,
+    selector: 'character'
+});
+
+const player2 = new Pokemon({
+    name: 'Charmander',
+    defaultHP: 100,
+    selector: 'enemy'
+});
+
+// --- ЛОГІКА БОЮ ---
+function handleAttack(attacker, defender, dmg) {
+    if (isGameOver) return;
+
+    defender.changeHP(dmg, (count) => {
+        const logText = generateLog(attacker, defender, count);
+        const $p = document.createElement('p');
+        $p.innerText = logText;
+        $logs.insertBefore($p, $logs.children[0]);
+
+        if (defender.damageHP === 0) {
+            isGameOver = true;
+            btnKick1.disabled = true;
+            btnKick2.disabled = true;
+
+            setTimeout(() => {
+                alert(`${defender.name} програв бій!`);
+            }, 300);
+        }
+    });
+}
+
+function performAttack(dmgToEnemy, dmgToCharacter) {
+    handleAttack(player1, player2, dmgToEnemy);
+    if (!isGameOver) {
+        handleAttack(player2, player1, dmgToCharacter);
+    }
+}
+
+// --- ОБРОБКА ЛІМІТІВ КНОПОК ---
 function createClickCounter(limit, btn) {
     let clicksCount = 0;
 
     return function (actionCallback) {
         if (clicksCount >= limit) {
-            console.log(`Кнопку "${btn.innerText.trim()}" більше не можна натискати (досягнуто ліміт ${limit})`);
+            console.log(`Кнопку "${btn.innerText.trim()}" більше не можна натискати`);
             return;
         }
 
         clicksCount++;
         const remainingClicks = limit - clicksCount;
 
-        console.log(`[${btn.innerText.trim()}] Натиснуто разів: ${clicksCount} | Залишилось кліків: ${remainingClicks}`);
-
         actionCallback();
 
         if (remainingClicks === 0) {
             btn.disabled = true;
-            console.log(`Кнопку "${btn.innerText.trim()}" заблоковано!`);
         }
     };
 }
@@ -144,7 +148,6 @@ function createClickCounter(limit, btn) {
 const kick1Counter = createClickCounter(6, btnKick1);
 const kick2Counter = createClickCounter(6, btnKick2);
 
-// Вішаємо обробники дій через замикання
 btnKick1.addEventListener('click', function () {
     kick1Counter(() => {
         performAttack(random(20, 10), random(20, 10));
