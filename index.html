@@ -2,8 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemon Fight</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,37 +14,32 @@
     <div class="playground">
         <div class="pokemon character">
             <span class="lvl">Lv. 1</span>
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" class="sprite" alt="Pikachu">
+            <img src="" class="sprite" id="img-player1" alt="Pokemon">
             <div class="details">
-                <h2 class="name" id="name-character">Pikachu</h2>
+                <h2 class="name" id="name-player1"></h2>
                 <div class="hp">
                     <div class="bar">
-                        <div class="health" id="progressbar-character" style="width: 100%;"></div>
+                        <div class="health" id="progressbar-player1" style="width: 100%;"></div>
                     </div>
-                    <span class="text" id="health-character">100 / 100</span>
+                    <span class="text" id="health-player1"></span>
                 </div>
             </div>
         </div>
 
         <div class="control" style="flex-direction: column; gap: 15px;">
-            <button class="button" id="btn-kick1">
-                Thunder Jolt (Швидка атака)
-            </button>
-            <button class="button" id="btn-kick2">
-                Electro Ball (Сильна атака)
-            </button>
+            <!-- Кнопки тепер будуть генеруватися через JavaScript -->
         </div>
 
         <div class="pokemon enemy">
             <span class="lvl">Lv. 1</span>
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" class="sprite" alt="Charmander">
+            <img src="" class="sprite" id="img-player2" alt="Pokemon">
             <div class="details">
-                <h2 class="name" id="name-enemy">Charmander</h2>
+                <h2 class="name" id="name-player2"></h2>
                 <div class="hp">
                     <div class="bar">
-                        <div class="health" id="progressbar-enemy" style="width: 100%;"></div>
+                        <div class="health" id="progressbar-player2" style="width: 100%;"></div>
                     </div>
-                    <span class="text" id="health-enemy">100 / 100</span>
+                    <span class="text" id="health-player2"></span>
                 </div>
             </div>
         </div>
