@@ -1,4 +1,4 @@
-// --- ДАНІ ПОКЕМОНІВ (З новими локальними зображеннями в assets) ---
+
 const pokemons = [
     { 
         name: 'Pikachu', 
@@ -74,7 +74,6 @@ const pokemons = [
     }
 ];
 
-// --- ДОПОМІЖНІ ФУНКЦІЇ ---
 function random(max, min = 0) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -155,7 +154,6 @@ class Pokemon extends Selectors {
     }
 }
 
-// --- ГОЛОВНА ЛОГІКА ---
 const $control = document.querySelector('.control');
 const $logs = document.getElementById('logs');
 let player1;
@@ -166,8 +164,6 @@ function initGame() {
     isGameOver = false;
     $control.innerHTML = ''; 
     $logs.innerHTML = ''; 
-
-    // Створюємо головного гравця та суперника випадковим чином за допомогою spread оператора
     player1 = new Pokemon({
         ...getRandomPokemon(),
         selectors: 'player1'
@@ -177,8 +173,6 @@ function initGame() {
         ...getRandomPokemon(),
         selectors: 'player2'
     });
-
-    // Динамічно створюємо кнопки атак для нашого покемона
     player1.attacks.forEach(item => {
         const $btn = document.createElement('button');
         $btn.classList.add('button');
@@ -190,10 +184,7 @@ function initGame() {
             if (isGameOver) return;
             
             btnCounter(() => {
-                // Атака нашого покемона по ворогу
                 const dmgToEnemy = random(item.maxDamage, item.minDamage);
-                
-                // Ворог завжди відповідає першим ударом із власного списку доступних атак
                 const enemyAttack = player2.attacks[0];
                 const dmgToCharacter = random(enemyAttack.maxDamage, enemyAttack.minDamage);
 
@@ -238,8 +229,6 @@ function endGame(winner, loser) {
     
     setTimeout(() => {
         alert(`Бій завершено! ${loser.name} програв.`);
-        
-        // Створюємо кнопку швидкого перезапуску після програшу/перемоги
         $control.innerHTML = '';
         const $resetBtn = document.createElement('button');
         $resetBtn.classList.add('button');
@@ -248,8 +237,6 @@ function endGame(winner, loser) {
         $control.appendChild($resetBtn);
     }, 500);
 }
-
-// Замикання для підрахунку лімітів натискання з оновленням тексту на самій кнопці
 function createClickCounter(limit, btnElement, attackName) {
     let clicksCount = 0;
 
@@ -269,5 +256,4 @@ function createClickCounter(limit, btnElement, attackName) {
     };
 }
 
-// Перший запуск гри
 initGame();
